@@ -1,0 +1,3 @@
+<launch>
+<node pkg="lines" type="detection.py" name="lines" output="screen"></node>
+</launch>
