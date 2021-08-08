@@ -42,7 +42,7 @@ class Detect_line(object):
     #bridge object and image sub declared
     def __init__(self):
         self.bridge_object=CvBridge()
-        self.image_sub = rospy.Subscriber("camera/rgb/image_raw",Image,self.camera_callback)
+        self.image_sub = rospy.Subscriber("camera/image/compressed",Image,self.camera_callback)
         self.switch=[1,1]
     
     #callback (looping) function
