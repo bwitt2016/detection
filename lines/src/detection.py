@@ -43,11 +43,12 @@ class Detect_line(object):
     def __init__(self):
         self.bridge_object=CvBridge()
         self.image_sub = rospy.Subscriber("camera/rgb/image_raw",Image,self.camera_callback)
+        self.switch=[1,1]
     
     #callback (looping) function
     def camera_callback(self,data):
         try:
-            switch=[1,1]
+            self.switch=[1,1]
             
             #raw image in bgr
             cv_image=self.bridge_object.imgmsg_to_cv2(data,desired_encoding="bgr8")
@@ -90,7 +91,7 @@ class Detect_line(object):
                 #if no moment exists, then just post in center
                
                 #print("white out of bounds")
-                switch[1]=0
+                self.switch[1]=0
                 #wx,wy=width,width
                 
             try:
@@ -101,7 +102,7 @@ class Detect_line(object):
             except ZeroDivisionError:
                 #if no moment exists, then just post in center
                 #print("Yellow out of bounds")
-                switch[0]=0
+                self.switch[0]=0
                 #cx,cy=0,0
                 
             
@@ -118,32 +119,29 @@ class Detect_line(object):
         
        
         
-        
-        if switch[1]==1 and sum(switch)==1:
+        """
+        if self.switch[1]==1 and sum(self.switch)==1:
             cv2.circle(warped,(int(wx),int(20)),10,(0,0,255),-1)
             cv2.circle(warped,(int(wx/2),int(40)),10,(0,250,35),-1)
             print(wx)
             follow(wx/2-20,w/2)
            
         
-        if switch[0]==1 and sum(switch)==1:
+        if self.switch[0]==1 and sum(self.switch)==1:
             cv2.circle(warped,(int(cx),int(20)),10,(0,0,255),-1)
             cv2.circle(warped,(int((cx+199))/2,int(40)),10,(0,250,35),-1)
             print(cx)
             follow(cx+w/2+20,w/2)
         
             
-        if sum(switch)==2:
+        if sum(self.switch)==2:
             x=(wx+cx)/2
             cv2.circle(warped,(int(x),int(10)),10,(0,200,100),-1)
             follow(x,w/2)
             print(w/2-wx);print(w/2-cx)
         #when you do not detect either line
-        if sum(switch)==0:
-            follow(-1,None)
-        
-        print(switch)
-        
+        """
+           
         
         cv2.imshow("Image Window",cv_image)
         cv2.imshow("YELLOW EDGES",yellow)
@@ -152,7 +150,7 @@ class Detect_line(object):
         cv2.waitKey(1)
         #h,w,c=warped.shape
         
-
+    
 
 #calculates difference of x and median
 #the median is 
@@ -186,6 +184,7 @@ def follow(x,med):
         move.linear.x=0
         move.angular.z=0
         pub.publish(move)
+        return
     offset=percent_change(x,med)
     print(offset)
     z=get_av(offset)
@@ -206,6 +205,7 @@ def main():
     detect=Detect_line()
     #node
     rospy.init_node('lines')
+    
     try:
         rospy.spin()
     except KeyboardInterrupt:
